@@ -183,6 +183,10 @@ fn main_hash_computation(digest: Digest, message_schedule: &MessageSchedule) -> 
         c = b;
         b = a;
         a = wrapping_add_words([t1, t2]);
+
+        println!("Intermediate t1_t2_a_b_c_d_e_f_g_h value #{}:", t + 1);
+        print_hex(&[t1, t2, a, b, c, d, e, f, g, h].as_flattened());
+        println!();
     }
 
     [

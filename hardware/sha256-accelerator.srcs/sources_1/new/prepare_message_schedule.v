@@ -37,38 +37,6 @@ module prepare_message_schedule(
 	// Basic functions.
 	//==============================================================================================
 	
-	function [31:0] ch(
-	   input [31:0] x, y, z
-	);
-	   begin
-	       ch = (x & y) ^ ((!x) & z);
-	   end
-	endfunction
-	
-	function [31:0] maj(
-	   input [31:0] x, y, z
-	);
-	   begin
-	       maj = (x & y) ^ (x & z) ^ (y & z);
-	   end
-	endfunction
-	
-	function [31:0] bsig0(
-	   input [31:0] x
-	);
-	   begin
-	       bsig0 = {x[1:0], x[31:2]} ^ {x[12:0], x[31:13]} ^ {x[21:0], x[31:22]};
-	   end
-	endfunction
-	
-	function [31:0] bsig1(
-	   input [31:0] x
-	);
-	   begin
-	       bsig1 = {x[5:0], x[31:6]} ^ {x[10:0], x[31:11]} ^ {x[24:0], x[31:25]};
-	   end
-	endfunction
-	
 	function [31:0] ssig0(
 	   input [31:0] x
 	);
