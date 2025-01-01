@@ -10,14 +10,12 @@ module prepare_message_schedule(
     always @ (posedge clk) begin
         if(step == 0) begin
             message_schedule[(64 * 32) - 1 -:(16 * 32)] <= padded_message;
-            
-            step = step + 1;
         end else begin
-            message_schedule[((64 - 16 - step - 1) * 32) - 1 -: 32] <= 
+            message_schedule[((64 - 16 - step + 1) * 32) - 1 -: 32] <= 
                 prepare_message_schedule_step(message_schedule, step - 1);
-                
-            step = step + 1;
         end
+        
+        step <= step + 1;
 	end
 	
 	function [31:0] prepare_message_schedule_step(
@@ -67,17 +65,15 @@ module prepare_message_schedule_testbench();
         .message_schedule(schedule)
     );
     
+    always #5 clk <= ~clk;
+    
     initial begin
         message <= 'h61626364_65800000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000028;
-        
-        for(i = 0; i < 4; i = i + 1) begin
-            clk <= 1;
-            #10
-            clk <= 0;
-            #10
-            
-            print_schedule();
-        end        
+        clk <= 0;      
+    end
+    
+    always @(posedge clk) begin
+        print_schedule();
     end
     
     task print_schedule();
