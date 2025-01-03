@@ -2,7 +2,7 @@
 
 module sha256(
     input clk,
-    input [511:0] message,
+    input [255:0] message,
     output [255:0] digest
 );
     wire [2047:0] message_schedule;
@@ -10,9 +10,11 @@ module sha256(
     reg pms_clk = 0;
     reg mhc_clk = 0;
     
+    wire [511:0] padded_message = {message, 1'b1, 191'b0, 64'h00000000_00000100};
+    
     prepare_message_schedule pms(
         .clk(pms_clk),
-        .padded_message(message),
+        .padded_message(padded_message),
         .message_schedule(message_schedule)
     );
     
@@ -44,7 +46,7 @@ endmodule
 
 module sha256_testbench();
     reg clk;
-    reg [511:0] message;
+    reg [255:0] message;
     wire [255:0] digest;
 
     sha256 sha256_inst(
@@ -57,7 +59,7 @@ module sha256_testbench();
 
     initial begin
         clk <= 0;
-        message <= 'h61626364_65800000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000028;
+        message <= 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
     end
     
     always @(posedge clk) begin

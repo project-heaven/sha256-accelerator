@@ -2,10 +2,9 @@
 
 module uart(
     input clk,
-    output reg tx
+    output reg tx,
+    input [7:0] data
 );
-    wire [7:0] data = 'h23;
-    
     reg [7:0] current_packet;
     
     reg [4:0] tx_bit_idx = 0;

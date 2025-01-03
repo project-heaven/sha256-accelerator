@@ -2,10 +2,10 @@
 
 module main(
     input clk,
-    output test,
+    input uart_rx,
     output uart_tx
 );
-    wire [511:0] message;
+    wire [255:0] message;
     wire [255:0] digest;
     
     wire clk_primary;
@@ -14,10 +14,11 @@ module main(
     main_clock main_clock_inst(
         .clk_in(clk),
         .clk_out_primary(clk_primary),
-        .clk_out_uart(clk_uart)
+        .clk_out_uart(clk_uart),
+        .reset(0)
     );
     
-    assign message = 'h61626364_65800000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000028;
+    assign message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
     
     sha256 sha256_inst(
         .clk(clk_primary),
@@ -27,8 +28,7 @@ module main(
     
     uart uart_inst(
         .clk(clk_uart),
-        .tx(uart_tx)
+        .tx(uart_tx),
+        .data(digest[7:0])
     );
-    
-    assign test = ~^digest;
 endmodule
