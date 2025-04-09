@@ -10,6 +10,10 @@ module main(
     
     wire clk_primary;
     wire clk_uart;
+        
+    wire [7:0] digest_serial;
+    
+    reg digest_valid = 1;
     
     main_clock main_clock_inst(
         .clk_in(clk),
@@ -30,5 +34,12 @@ module main(
         .clk(clk_uart),
         .tx(uart_tx),
         .data(digest[7:0])
+    );
+    
+    parallel_to_serial parallel_to_serial_inst(
+        .clk(clk_primary),
+        .digest(digest),
+        .digest_valid(digest_valid),
+        .byte(digest_serial)
     );
 endmodule

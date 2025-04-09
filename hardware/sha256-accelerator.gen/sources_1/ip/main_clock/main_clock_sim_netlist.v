@@ -1,10 +1,10 @@
 // Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2020.2 (win64) Build 3064766 Wed Nov 18 09:12:45 MST 2020
-// Date        : Thu Jan  2 16:39:26 2025
-// Host        : DESKTOP-UN8G6OF running 64-bit major release  (build 9200)
+// Date        : Wed Apr  9 13:26:46 2025
+// Host        : mertwole running 64-bit major release  (build 9200)
 // Command     : write_verilog -force -mode funcsim
-//               c:/Users/mertwole/Documents/Projects/HardwareProjects/FPGA_learning/sha256-accelerator/hardware/sha256-accelerator.gen/sources_1/ip/main_clock/main_clock_sim_netlist.v
+//               c:/Users/mertwole_/Documents/Projects/sha256-accelerator/hardware/sha256-accelerator.gen/sources_1/ip/main_clock/main_clock_sim_netlist.v
 // Design      : main_clock
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.
