@@ -2,8 +2,11 @@
 
 module sha256(
     input clk,
+    
     input [255:0] message,
-    output [255:0] digest
+    
+    output [255:0] digest,
+    output wire digest_valid
 );
     wire [2047:0] message_schedule;
     
@@ -14,17 +17,21 @@ module sha256(
     
     prepare_message_schedule pms(
         .clk(pms_clk),
+        .reset(digest_valid),
         .padded_message(padded_message),
         .message_schedule(message_schedule)
     );
     
     main_hash_computation mhc(
         .clk(mhc_clk),
+        .reset(digest_valid),
         .message_schedule(message_schedule),
         .digest(digest)
     );
     
     integer step = 0;
+    
+    assign digest_valid = step == 49 + 66;
     
     always @(clk) begin
         if (step < 49) begin
@@ -40,7 +47,11 @@ module sha256(
     end
     
     always @(posedge clk) begin
-        step <= step + 1;
+        if (step < 49 + 66) begin
+            step <= step + 1;
+        end else begin
+            step <= 0;
+        end
     end
 endmodule
 
@@ -48,11 +59,13 @@ module sha256_testbench();
     reg clk;
     reg [255:0] message;
     wire [255:0] digest;
+    wire digest_valid;
 
     sha256 sha256_inst(
         .clk(clk),
         .message(message),
-        .digest(digest)
+        .digest(digest),
+        .digest_valid(digest_valid)
     );
 
     always #1 clk=~clk;
@@ -63,6 +76,14 @@ module sha256_testbench();
     end
     
     always @(posedge clk) begin
-        $display("Message digest: %h", digest);
+        if (digest_valid) begin
+            $display("Message digest: %h", digest);
+        end
+    end
+    
+    always @ (negedge clk) begin 
+        if (digest_valid) begin
+            message <= message + 1;
+        end
     end
 endmodule

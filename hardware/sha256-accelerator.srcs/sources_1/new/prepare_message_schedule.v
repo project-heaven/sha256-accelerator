@@ -2,10 +2,15 @@
 
 module prepare_message_schedule(
     input clk,
+    input reset,
     input [(16 * 32) - 1:0] padded_message,
     output reg [(64 * 32) - 1:0] message_schedule
 );
     integer step = 0;
+
+    always @ (negedge reset) begin 
+        step <= 0;
+    end
 
     always @ (posedge clk) begin
         if(step == 0) begin

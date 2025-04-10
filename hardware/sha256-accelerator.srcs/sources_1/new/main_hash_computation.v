@@ -2,6 +2,7 @@
 
 module main_hash_computation(
     input clk,
+    input reset,
     input [(64 * 32) - 1:0] message_schedule,
     output reg [255:0] digest
 );
@@ -18,6 +19,10 @@ module main_hash_computation(
 	reg [31:0] f;
 	reg [31:0] g;
 	reg [31:0] h;
+
+    always @ (negedge reset) begin 
+        step <= 0;
+    end
 
     always @ (posedge clk) begin
         if (step == 0) begin   

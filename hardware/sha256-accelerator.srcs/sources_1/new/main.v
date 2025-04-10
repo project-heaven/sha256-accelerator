@@ -5,13 +5,8 @@ module main(
     input uart_rx,
     output uart_tx
 );
-    //wire [255:0] message;
-    //wire [255:0] digest;
-    
     wire clk_primary;
     wire clk_uart;
-    
-    //reg digest_valid = 1;
     
     main_clock main_clock_inst(
         .clk_in(clk),
@@ -20,33 +15,19 @@ module main(
         .reset(0)
     );
     
-//    assign message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
-    
-//    sha256 sha256_inst(
-//        .clk(clk_primary),
-//        .message(message),
-//        .digest(digest)
-//    );
-    
-    // ======================== TESTING =====================
-    
+    wire [255:0] message;
     wire [255:0] digest;
-    reg digest_valid = 0;
-    integer digest_counter = 0;
     
-    assign digest = 'h61626364_65666768_69707172_73747576_77787980_81828384_85868788_89909192;
+    wire digest_valid;
     
-    always @ (posedge clk_primary) begin 
-        if (digest_counter == 10_000_000) begin 
-            digest_counter <= 0;
-        end else begin 
-            digest_counter <= digest_counter + 1;
-        end
-        
-        digest_valid <= digest_counter == 0;
-    end 
+    assign message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
     
-    // ======================================================
+    sha256 sha256_inst(
+        .clk(clk_primary),
+        .message(message),
+        .digest(digest),
+        .digest_valid(digest_valid)
+    );
     
     wire [7:0] digest_byte;
     wire digest_byte_valid;
