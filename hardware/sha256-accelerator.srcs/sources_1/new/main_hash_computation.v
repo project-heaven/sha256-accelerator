@@ -20,11 +20,7 @@ module main_hash_computation(
 	reg [31:0] g;
 	reg [31:0] h;
 
-    always @ (negedge reset) begin 
-        step <= 0;
-    end
-
-    always @ (posedge clk) begin
+    always @ (posedge clk, posedge reset) begin
         if (step == 0) begin   
             digest = 'h6a09e667_bb67ae85_3c6ef372_a54ff53a_510e527f_9b05688c_1f83d9ab_5be0cd19;
             
@@ -52,7 +48,11 @@ module main_hash_computation(
 			};
         end
         
-        step = step + 1;
+        if (reset) begin 
+            step = 0;
+        end else begin
+            step = step + 1;
+        end
 	end
 	
 	reg [31:0] t1;

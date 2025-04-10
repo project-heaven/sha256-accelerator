@@ -4,6 +4,7 @@ module sha256(
     input clk,
     
     input [255:0] message,
+    input message_valid,
     
     output [255:0] digest,
     output wire digest_valid
@@ -15,21 +16,25 @@ module sha256(
     
     wire [511:0] padded_message = {message, 1'b1, 191'b0, 64'h00000000_00000100};
     
+    wire reset_inner;
+    
+    integer step = 49 + 66 + 1;
+    
+    assign reset_inner = step == 49 + 66 + 1;
+    
     prepare_message_schedule pms(
         .clk(pms_clk),
-        .reset(digest_valid),
+        .reset(reset_inner),
         .padded_message(padded_message),
         .message_schedule(message_schedule)
     );
     
     main_hash_computation mhc(
         .clk(mhc_clk),
-        .reset(digest_valid),
+        .reset(reset_inner),
         .message_schedule(message_schedule),
         .digest(digest)
     );
-    
-    integer step = 0;
     
     assign digest_valid = step == 49 + 66;
     
@@ -47,23 +52,27 @@ module sha256(
     end
     
     always @(posedge clk) begin
-        if (step < 49 + 66) begin
+        if (step < 49 + 66 + 1) begin
             step <= step + 1;
         end else begin
-            step <= 0;
+            step <= message_valid ? 0 : step;
         end
     end
 endmodule
 
 module sha256_testbench();
     reg clk;
+    
     reg [255:0] message;
+    reg message_valid = 1;
+    
     wire [255:0] digest;
     wire digest_valid;
 
     sha256 sha256_inst(
         .clk(clk),
         .message(message),
+        .message_valid(message_valid),
         .digest(digest),
         .digest_valid(digest_valid)
     );

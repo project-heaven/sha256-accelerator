@@ -15,16 +15,52 @@ module main(
         .reset(0)
     );
     
-    wire [255:0] message;
-    wire [255:0] digest;
+    //wire [255:0] message;
+    //wire message_valid;
     
+    wire [255:0] digest;
     wire digest_valid;
     
-    assign message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
+    //assign message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
+    //assign message_valid = 1;
+    
+    // =============== TESTING ========================
+    
+    reg [255:0] message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
+    reg message_valid = 0;
+    
+    reg counter = 0;
+    
+    always @(posedge clk_primary) begin
+        if (counter == 0) begin
+            //message <= 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
+            message_valid <= 1;
+        end else if (counter == 100_000_000) begin
+            //message <= 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000001;
+            //message_valid <= 1;
+        end else if (counter == 200_000_000) begin
+            //message <= 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000002;
+            //message_valid <= 1;
+        end else if (counter == 300_000_000) begin
+            //message <= 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000003;
+            //message_valid <= 1;
+        end else begin 
+            message_valid <= 0;
+        end
+        
+        if (counter == 400_000_000) begin
+            counter <= 0;
+        end else begin
+            counter <= counter + 1;
+        end
+    end
+    
+    // ================================================
     
     sha256 sha256_inst(
         .clk(clk_primary),
         .message(message),
+        .message_valid(message_valid),
         .digest(digest),
         .digest_valid(digest_valid)
     );
@@ -49,7 +85,6 @@ module main(
         .wr_clk(clk_primary),
         .rd_clk(clk_uart),
         
-        //.full(),
         .wr_en(digest_byte_valid),
         .din(digest_byte),
         
