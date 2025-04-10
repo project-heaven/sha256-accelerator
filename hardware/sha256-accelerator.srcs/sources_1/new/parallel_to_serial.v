@@ -6,7 +6,8 @@ module parallel_to_serial(
     input [255:0] digest,
     input digest_valid,
     
-    output reg [7:0] byte
+    output reg [7:0] byte,
+    output reg byte_valid
 );
 
 localparam integer step_count = 32;
@@ -23,7 +24,10 @@ always @ (posedge clk) begin
 
     if(step != step_count) begin 
         byte <= digest_reg[255 - 8 * (step) -: 8];
+        byte_valid <= 1;
         step <= step + 1;
+    end else begin
+        byte_valid <= 0;
     end
 end
 
@@ -35,6 +39,7 @@ module parallel_to_serial_testbench();
     reg digest_valid;
     
     wire[7:0] output_byte;
+    wire output_byte_valid;
 
     reg is_first_clk;
 
@@ -44,7 +49,8 @@ module parallel_to_serial_testbench();
         .clk(clk),
         .digest(digest),
         .digest_valid(digest_valid),
-        .byte(output_byte)
+        .byte(output_byte),
+        .byte_valid(output_byte_valid)
     );
     
     initial begin
@@ -61,6 +67,6 @@ module parallel_to_serial_testbench();
             digest_valid = 0;
         end
         
-        $display("output byte: %h", output_byte);    
+        $display("output byte: %h, is valid: %b", output_byte, output_byte_valid);    
     end
 endmodule

@@ -2,36 +2,45 @@
 
 module uart(
     input clk,
-    output reg tx,
-    input [7:0] data
+    
+    input [7:0] data,
+    input data_valid,
+    
+    output ready,
+    
+    output reg tx
 );
     reg [7:0] current_packet;
     
-    reg [4:0] tx_bit_idx = 0;
+    reg [4:0] tx_bit_idx = 10;
     
-    reg clk_divided;
-    reg [9:0] clk_division;
+    integer clk_division;
+    
+    assign ready = tx_bit_idx == 10;
     
     always @(posedge clk) begin
-        if (clk_division == 960 / 2 - 1) begin
+        if (clk_division == 960 - 1) begin
             clk_division <= 0;
-            clk_divided <= ~clk_divided;
+            
+            if (tx_bit_idx == 0) begin
+                tx <= 0;
+            end else if(tx_bit_idx < 9) begin
+                current_packet[6:0] <= current_packet[7:1];
+                tx <= current_packet[0];
+            end else begin
+                tx <= 1;
+            end
+            
+            if (tx_bit_idx < 10) begin
+                tx_bit_idx <= tx_bit_idx + 1;
+            end
         end else begin
             clk_division <= clk_division + 1;
         end
-    end
-    
-    always @(posedge clk_divided) begin
-        if (tx_bit_idx == 0) begin
-            current_packet <= data;
-            tx <= 0;
-        end else if(tx_bit_idx < 9) begin
-            current_packet[6:0] <= current_packet[7:1];
-            tx <= current_packet[0];
-        end else begin
-            tx <= 1;
-        end
         
-        tx_bit_idx <= tx_bit_idx < 10 ? tx_bit_idx + 1 : 0;
+        if (ready && data_valid) begin 
+            current_packet <= data;
+            tx_bit_idx <= 0;
+        end
     end
 endmodule
