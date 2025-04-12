@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module uart(
+module uart (
     input clk,
     
     input [7:0] data,
@@ -8,18 +8,20 @@ module uart(
     
     output ready,
     
-    output reg tx
+    output reg tx = 1
 );
-    reg [7:0] current_packet;
+    parameter CLOCK_DIVISION = 960;
+
+    reg [7:0] current_packet = 0;
     
     reg [4:0] tx_bit_idx = 10;
     
-    integer clk_division;
+    integer clk_division = 0;
     
     assign ready = tx_bit_idx == 10;
     
     always @(posedge clk) begin
-        if (clk_division == 960 - 1) begin
+        if (clk_division == CLOCK_DIVISION - 1) begin
             clk_division <= 0;
             
             if (tx_bit_idx == 0) begin
@@ -58,9 +60,49 @@ module uart(
                 'hE: current_packet <= 69;
                 'hF: current_packet <= 70;
             endcase
-        
-            // current_packet <= data;
+
             tx_bit_idx <= 0;
+        end
+    end
+endmodule
+
+module uart_testbench();
+    reg clk = 0;
+    reg [7:0] data = 0;
+    reg data_valid = 0;
+    
+    wire ready;
+    wire tx;
+
+    uart #(.CLOCK_DIVISION(4)) uart_inst(
+        .clk(clk),
+        .data(data),
+        .data_valid(data_valid),
+        .ready(ready),
+        .tx(tx)
+    );
+    
+    always #1 clk <= ~clk;
+    
+    integer counter = 0;
+    
+    always @ (posedge clk) begin
+        counter <= counter + 1;
+    
+        if (counter == 20) begin
+            data <= 'h00;
+            data_valid <= 1;
+        end else if (counter == 70) begin
+            data <= 'h01;
+            data_valid <= 1;
+        end else if (counter == 150) begin
+            data <= 'h02;
+            data_valid <= 1;
+        end else if (counter == 210) begin
+            data <= 'h03;
+            data_valid <= 1;
+        end else begin
+            data_valid <= 0;
         end
     end
 endmodule
