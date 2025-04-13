@@ -10,26 +10,26 @@ module parallel_to_serial(
     output reg byte_valid
 );
 
-localparam integer step_count = 32;
+    localparam integer step_count = 32;
+        
+    reg[255:0] digest_reg;
+
+    integer step = step_count;
+
+    always @ (posedge clk) begin 
+        if (digest_valid) begin 
+            digest_reg <= digest;
+            step <= 0;
+        end
     
-reg[255:0] digest_reg;
-
-integer step = step_count;
-
-always @ (posedge clk) begin 
-    if (digest_valid) begin 
-        digest_reg <= digest;
-        step <= 0;
+        if(step != step_count) begin 
+            byte <= digest_reg[255 - 8 * (step) -: 8];
+            byte_valid <= 1;
+            step <= step + 1;
+        end else begin
+            byte_valid <= 0;
+        end
     end
-
-    if(step != step_count) begin 
-        byte <= digest_reg[255 - 8 * (step) -: 8];
-        byte_valid <= 1;
-        step <= step + 1;
-    end else begin
-        byte_valid <= 0;
-    end
-end
 
 endmodule
 
