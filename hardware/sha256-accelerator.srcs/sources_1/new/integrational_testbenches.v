@@ -1,46 +1,26 @@
 `timescale 1ns / 1ps
 
-module main(
-    input clk,
-    input uart_rx,
-    output uart_tx
-);  
-    wire clk_primary;
-    wire clk_uart;
-    
-    main_clock main_clock_inst(
-        .clk_in(clk),
-        .clk_out_primary(clk_primary),
-        .clk_out_uart(clk_uart),
-        .reset(0)
-    );
+module parallel_to_serial_with_uart_testbench();
+    reg clk_primary = 0;
+    reg clk_uart = 0;
 
-    integer counter = 0;
-    wire message_valid = counter == 10;
+    always #0.37 clk_primary <= ~clk_primary;
+    always #1 clk_uart <= ~clk_uart;
+
+    wire [255:0] digest;
+    integer digest_counter = 0;
+    wire digest_valid = digest_counter == 0;
+    
+    assign digest = 'h11223344_55667788_99AABBCC_11223344_55667788_99AABBCC_11223344_55667788;
     
     always @ (posedge clk_primary) begin 
-        if (counter == 500_000_000) begin 
-            counter <= 0;
+        if (digest_counter == 500_000_000) begin 
+            digest_counter <= 0;
         end else begin 
-            counter <= counter + 1;
+            digest_counter <= digest_counter + 1;
         end
     end 
-    
-    wire [255:0] message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
-    wire [255:0] digest;
-    
-    wire digest_valid;
-    
-    sha256 sha256_inst(
-        .clk(clk_primary),
-        
-        .message(message),
-        .message_valid(message_valid),
-        
-        .digest(digest),
-        .digest_valid(digest_valid)
-    );
-    
+
     wire [7:0] digest_byte;
     wire digest_byte_valid;
     
@@ -68,7 +48,7 @@ module main(
         .dout(uart_data)
     );
     
-    uart uart_inst(
+    uart #(.FREQUENCY_DIVISOR(1)) uart_inst(
         .clk(clk_uart),
         
         .data(uart_data),

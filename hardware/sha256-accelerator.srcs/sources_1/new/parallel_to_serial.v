@@ -9,7 +9,6 @@ module parallel_to_serial(
     output reg [7:0] byte,
     output reg byte_valid
 );
-
     localparam integer step_count = 32;
         
     reg[255:0] digest_reg;
@@ -21,7 +20,7 @@ module parallel_to_serial(
             digest_reg <= digest;
             step <= 0;
         end
-    
+
         if(step != step_count) begin 
             byte <= digest_reg[255 - 8 * (step) -: 8];
             byte_valid <= 1;
@@ -30,7 +29,6 @@ module parallel_to_serial(
             byte_valid <= 0;
         end
     end
-
 endmodule
 
 module parallel_to_serial_testbench();
