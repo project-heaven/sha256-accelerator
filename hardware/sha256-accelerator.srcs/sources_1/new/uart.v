@@ -10,9 +10,7 @@ module uart #(FREQUENCY_DIVISOR = 960) (
     
     output reg tx = 1
 );
-    parameter CLOCK_DIVISION = 960;
-
-    reg [7:0] current_packet = 0;
+    reg [7:0] current_packet;
     
     reg [4:0] tx_bit_idx = 10;
     
@@ -62,47 +60,6 @@ module uart #(FREQUENCY_DIVISOR = 960) (
             endcase
             
             tx_bit_idx <= 0;
-        end
-    end
-endmodule
-
-module uart_testbench();
-    reg clk = 0;
-    reg [7:0] data = 0;
-    reg data_valid = 0;
-    
-    wire ready;
-    wire tx;
-
-    uart #(.CLOCK_DIVISION(4)) uart_inst(
-        .clk(clk),
-        .data(data),
-        .data_valid(data_valid),
-        .ready(ready),
-        .tx(tx)
-    );
-    
-    always #1 clk <= ~clk;
-    
-    integer counter = 0;
-    
-    always @ (posedge clk) begin
-        counter <= counter + 1;
-    
-        if (counter == 20) begin
-            data <= 'h00;
-            data_valid <= 1;
-        end else if (counter == 70) begin
-            data <= 'h01;
-            data_valid <= 1;
-        end else if (counter == 150) begin
-            data <= 'h02;
-            data_valid <= 1;
-        end else if (counter == 210) begin
-            data <= 'h03;
-            data_valid <= 1;
-        end else begin
-            data_valid <= 0;
         end
     end
 endmodule

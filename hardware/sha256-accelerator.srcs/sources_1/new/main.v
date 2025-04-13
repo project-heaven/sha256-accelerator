@@ -55,8 +55,6 @@ module main(
     wire[7:0] uart_data;
     wire tx_data_valid;
     wire uart_ready;
-
-    wire tx_data_valid;
     
     tx_fifo tx_fifo_inst(
         .wr_clk(clk_primary),
