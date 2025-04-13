@@ -1,7 +1,7 @@
 // Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2020.2 (win64) Build 3064766 Wed Nov 18 09:12:45 MST 2020
-// Date        : Wed Apr  9 13:26:46 2025
+// Date        : Sun Apr 13 13:33:31 2025
 // Host        : mertwole running 64-bit major release  (build 9200)
 // Command     : write_verilog -force -mode funcsim
 //               c:/Users/mertwole_/Documents/Projects/sha256-accelerator/hardware/sha256-accelerator.gen/sources_1/ip/main_clock/main_clock_sim_netlist.v

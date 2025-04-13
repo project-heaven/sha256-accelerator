@@ -15,20 +15,43 @@ module main(
         .reset(0)
     );
 
-    integer counter = 0;
-    wire message_valid = counter == 10;
+    wire [7:0] uart_rx_data;
+    wire uart_rx_data_valid;
+
+    uart_rx uart_rx_inst(
+        .clk(clk_uart),
+        .rx(uart_rx),
+        .data(uart_rx_data),
+        .data_valid(uart_rx_data_valid) 
+    );
+
+    wire [7:0] message_byte;
+    wire message_byte_valid;
+
+    rx_fifo rx_fifo_inst(
+        .wr_clk(clk_uart),
+        .rd_clk(clk_primary),
+        
+        .wr_en(uart_rx_data_valid),
+        .din(uart_rx_data),
+        
+        .valid(message_byte_valid),
+        .rd_en(1),
+        .dout(message_byte)
+    );
     
-    always @ (posedge clk_primary) begin 
-        if (counter == 500_000_000) begin 
-            counter <= 0;
-        end else begin 
-            counter <= counter + 1;
-        end
-    end 
+    wire message_valid;
+    wire [255:0] message;
     
-    wire [255:0] message = 'h61626364_65000000_00000000_00000000_00000000_00000000_00000000_00000000;
+    serial_to_parallel serial_to_parallel_inst(
+        .clk(clk_primary),
+        .data(message_byte),
+        .data_valid(message_byte_valid),
+        .message(message),
+        .message_valid(message_valid)
+    );
+
     wire [255:0] digest;
-    
     wire digest_valid;
     
     sha256 sha256_inst(
@@ -68,7 +91,7 @@ module main(
         .dout(uart_data)
     );
     
-    uart uart_inst(
+    uart_tx uart_tx_inst(
         .clk(clk_uart),
         
         .data(uart_data),
