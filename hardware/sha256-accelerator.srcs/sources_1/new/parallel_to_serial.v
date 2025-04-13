@@ -9,26 +9,51 @@ module parallel_to_serial(
     output reg [7:0] byte,
     output reg byte_valid
 );
-    localparam integer step_count = 32;
-        
+    localparam integer step_count = 64;
+    
     reg[255:0] digest_reg;
 
     integer step = step_count;
 
     always @ (posedge clk) begin 
-        if (digest_valid) begin 
+        if (digest_valid) begin
             digest_reg <= digest;
             step <= 0;
         end
 
         if(step != step_count) begin 
-            byte <= digest_reg[255 - 8 * (step) -: 8];
+            byte <= half_byte_to_ascii(digest_reg[255 - 4 * (step) -: 4]);
             byte_valid <= 1;
             step <= step + 1;
         end else begin
             byte_valid <= 0;
         end
     end
+    
+    function [7:0] half_byte_to_ascii(
+	   input [3:0] half_byte
+	);
+        begin
+            case (half_byte)
+                'h0: half_byte_to_ascii = 48;
+                'h1: half_byte_to_ascii = 49; 
+                'h2: half_byte_to_ascii = 50;
+                'h3: half_byte_to_ascii = 51;
+                'h4: half_byte_to_ascii = 52;
+                'h5: half_byte_to_ascii = 53;
+                'h6: half_byte_to_ascii = 54;
+                'h7: half_byte_to_ascii = 55;
+                'h8: half_byte_to_ascii = 56;
+                'h9: half_byte_to_ascii = 57;
+                'hA: half_byte_to_ascii = 65;
+                'hB: half_byte_to_ascii = 66;
+                'hC: half_byte_to_ascii = 67;
+                'hD: half_byte_to_ascii = 68;
+                'hE: half_byte_to_ascii = 69;
+                'hF: half_byte_to_ascii = 70;
+            endcase
+        end
+	endfunction
 endmodule
 
 module parallel_to_serial_testbench();

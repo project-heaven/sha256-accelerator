@@ -39,25 +39,7 @@ module uart_tx #(FREQUENCY_DIVISOR = 960) (
         end
         
         if (ready && data_valid) begin 
-            // TODO: Remove this workaround.
-            case (data[3:0])
-                'h0: current_packet <= 48;
-                'h1: current_packet <= 49; 
-                'h2: current_packet <= 50;
-                'h3: current_packet <= 51;
-                'h4: current_packet <= 52;
-                'h5: current_packet <= 53;
-                'h6: current_packet <= 54;
-                'h7: current_packet <= 55;
-                'h8: current_packet <= 56;
-                'h9: current_packet <= 57;
-                'hA: current_packet <= 65;
-                'hB: current_packet <= 66;
-                'hC: current_packet <= 67;
-                'hD: current_packet <= 68;
-                'hE: current_packet <= 69;
-                'hF: current_packet <= 70;
-            endcase
+            current_packet <= data;
             
             tx_bit_idx <= 0;
         end
