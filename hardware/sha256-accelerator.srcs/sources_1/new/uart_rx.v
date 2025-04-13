@@ -6,13 +6,11 @@ module uart_rx #(FREQUENCY_DIVISOR = 960) (
     input rx,
     
     output reg [7:0] data,
-    output wire data_valid
+    output reg data_valid
 );
     integer clk_division = 0;
 
     integer rx_bit_idx = 9;
-
-    assign data_valid = (rx_bit_idx == 8) && rx;
 
     always @(posedge clk) begin
         if (clk_division == FREQUENCY_DIVISOR - 1) begin
@@ -27,11 +25,16 @@ module uart_rx #(FREQUENCY_DIVISOR = 960) (
                 data[7] <= rx;
             end else if (rx_bit_idx == 8) begin
                 rx_bit_idx <= rx_bit_idx + 1;
+                
+                data_valid <= rx;
             end
         end else begin
             clk_division <= clk_division + 1;
         end
-
+        
+        if (data_valid) begin
+            data_valid <= 0;
+        end
     end
 endmodule
 
@@ -46,14 +49,24 @@ module uart_rx_testbench();
     wire[7:0] data;
     wire data_valid;
     
-    uart_rx #(.FREQUENCY_DIVISOR(1)) uart_rx_instance (
+    localparam FREQUENCY_DIVISOR = 4;
+    
+    uart_rx #(.FREQUENCY_DIVISOR(FREQUENCY_DIVISOR)) uart_rx_instance (
         .clk(clk),
         .rx(rx),
         .data(data),
         .data_valid(data_valid)
     );
     
+    integer counter = 0;
+     
     always @(posedge clk) begin
-        rx_sequence[31:1] <= rx_sequence[30:0];
+        if (counter == FREQUENCY_DIVISOR - 1) begin
+            counter <= 0;
+            
+            rx_sequence[31:1] <= rx_sequence[30:0];
+        end else begin
+            counter <= counter + 1;
+        end
     end
 endmodule
