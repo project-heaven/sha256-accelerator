@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module uart(
+module uart #(FREQUENCY_DIVISOR = 960) (
     input clk,
     
     input [7:0] data,
@@ -8,18 +8,18 @@ module uart(
     
     output ready,
     
-    output reg tx
+    output reg tx = 1
 );
     reg [7:0] current_packet;
     
     reg [4:0] tx_bit_idx = 10;
     
-    integer clk_division;
+    integer clk_division = 0;
     
     assign ready = tx_bit_idx == 10;
     
     always @(posedge clk) begin
-        if (clk_division == 960 - 1) begin
+        if (clk_division == FREQUENCY_DIVISOR - 1) begin
             clk_division <= 0;
             
             if (tx_bit_idx == 0) begin
