@@ -2,12 +2,13 @@
 
 module prepare_message_schedule(
     input clk,
+    input reset,
     input [(16 * 32) - 1:0] padded_message,
     output reg [(64 * 32) - 1:0] message_schedule
 );
     integer step = 0;
 
-    always @ (posedge clk) begin
+    always @ (posedge clk, posedge reset) begin
         if(step == 0) begin
             message_schedule[(64 * 32) - 1 -:(16 * 32)] <= padded_message;
         end else begin
@@ -15,7 +16,11 @@ module prepare_message_schedule(
                 prepare_message_schedule_step(message_schedule, step - 1);
         end
         
-        step <= step + 1;
+        if (reset) begin 
+            step <= 0;
+        end else begin
+            step <= step + 1;
+        end
 	end
 	
 	function [31:0] prepare_message_schedule_step(
