@@ -6,35 +6,87 @@ module uart_rx #(FREQUENCY_DIVISOR = 960) (
     input rx,
     
     output reg [7:0] data,
-    output reg data_valid
+    output reg data_valid = 0
 );
-    integer clk_division = 0;
+    localparam IDLE = 0;
+    localparam START_BIT = 1;
+    localparam DATA_BITS = 2;
+    localparam STOP_BIT = 3;
+    localparam SUBMIT_DATA = 4;
 
-    integer rx_bit_idx = 9;
+    reg[2:0] state = IDLE;
+    
+    integer clk_count = 0;
+
+    reg rx_metastable = 1;
+    reg rx_stable = 1;
+
+    reg[2:0] rx_bit_idx = 0;
+    localparam TOTAL_BITS_TO_RECEIVE = 8;
 
     always @(posedge clk) begin
-        if (clk_division == FREQUENCY_DIVISOR - 1) begin
-            clk_division <= 0;
-            
-            if (rx_bit_idx == 9 && rx == 0) begin
-                rx_bit_idx <= 0;
-            end else if (rx_bit_idx < 8) begin
-                rx_bit_idx <= rx_bit_idx + 1;
+        rx_metastable <= rx;
+        rx_stable <= rx_metastable;
+    end
+    
+    always @(posedge clk) begin
+        case (state) 
+            IDLE: begin
+                clk_count <= 0;
+                data_valid <= 0;
                 
-                data[6:0] <= data[7:1];
-                data[7] <= rx;
-            end else if (rx_bit_idx == 8) begin
-                rx_bit_idx <= rx_bit_idx + 1;
-                
-                data_valid <= rx;
+                if (rx_stable == 0) begin
+                    state <= START_BIT;
+                end else begin
+                    state <= IDLE;
+                end   
             end
-        end else begin
-            clk_division <= clk_division + 1;
-        end
-        
-        if (data_valid) begin
-            data_valid <= 0;
-        end
+            START_BIT: begin
+                if (clk_count == FREQUENCY_DIVISOR / 2) begin
+                    clk_count <= 0;
+                    
+                    if (rx_stable == 0) begin
+                        state <= DATA_BITS;
+                    end else begin
+                        state <= IDLE;
+                    end
+                end else begin
+                    clk_count <= clk_count + 1;
+                    state <= START_BIT;
+                    rx_bit_idx <= 0;
+                end
+            end
+            DATA_BITS: begin
+                if (clk_count == FREQUENCY_DIVISOR - 1) begin
+                    clk_count <= 0;
+                        
+                    data[6:0] <= data[7:1];
+                    data[7] <= rx_stable;
+                    
+                    if (rx_bit_idx == TOTAL_BITS_TO_RECEIVE - 1) begin
+                        state <= STOP_BIT;
+                    end else begin
+                        state <= DATA_BITS;
+                        rx_bit_idx <= rx_bit_idx + 1;
+                    end
+                end else begin
+                    clk_count <= clk_count + 1;
+                    state <= DATA_BITS;
+                end
+            end
+            STOP_BIT: begin
+                if (clk_count == FREQUENCY_DIVISOR - 1) begin 
+                    state <= SUBMIT_DATA;
+                end else begin
+                    clk_count <= clk_count + 1;
+                    state <= STOP_BIT;
+                end
+            end
+            SUBMIT_DATA: begin
+                data_valid <= 1;
+                state <= IDLE;
+            end
+        endcase
     end
 endmodule
 
